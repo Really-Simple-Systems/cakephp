@@ -11,6 +11,7 @@
  * @link          https://cakephp.org CakePHP(tm) Project
  * @since         0.2.9
  * @license       https://opensource.org/licenses/mit-license.php MIT License
+ *  Spotler CRM
  */
 use Cake\Core\Configure;
 use Cake\Error\Debugger;
