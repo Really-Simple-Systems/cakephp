@@ -75,14 +75,6 @@
             "PluginJs\\": "tests/test_app/Plugin/PluginJs/src/"
         }
     },
-    "replace": {
-        "cakephp/event": "self.version",
-        "cakephp/filesystem": "self.version",
-        "cakephp/form": "self.version",
-        "cakephp/i18n": "self.version",
-        "cakephp/utility": "self.version",
-        "cakephp/validation": "self.version"
-    },
     "conflict": {
         "phpunit/phpunit": "<5.7"
     },
