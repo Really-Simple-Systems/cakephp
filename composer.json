@@ -84,7 +84,6 @@
         "cakephp/form": "self.version",
         "cakephp/i18n": "self.version",
         "cakephp/log": "self.version",
-        "cakephp/orm": "self.version",
         "cakephp/utility": "self.version",
         "cakephp/validation": "self.version"
     },
