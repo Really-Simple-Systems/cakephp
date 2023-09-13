@@ -76,7 +76,6 @@
         }
     },
     "replace": {
-        "cakephp/cache": "self.version",
         "cakephp/event": "self.version",
         "cakephp/filesystem": "self.version",
         "cakephp/form": "self.version",
