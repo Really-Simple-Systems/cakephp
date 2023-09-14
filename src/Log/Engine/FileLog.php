@@ -110,15 +110,12 @@ class FileLog extends BaseLog
     }
 
     /**
-     * Implements writing to log files.
-     *
-     * @param string $level The severity level of the message being written.
-     *    See Cake\Log\Log::$_levels for list of possible levels.
-     * @param string $message The message you want to log.
-     * @param array $context Additional information about the logged message
-     * @return bool success of write.
+     * @param $level
+     * @param string|\Stringable $message
+     * @param array $context
+     * @return void
      */
-    public function log($level, $message, array $context = [])
+    public function log($level, string|\Stringable $message, array $context = []): void
     {
         $message = $this->_format($message, $context);
         $output = date('Y-m-d H:i:s') . ' ' . ucfirst($level) . ': ' . $message . "\n";
@@ -130,7 +127,9 @@ class FileLog extends BaseLog
         $pathname = $this->_path . $filename;
         $mask = $this->_config['mask'];
         if (!$mask) {
-            return file_put_contents($pathname, $output, FILE_APPEND);
+            file_put_contents($pathname, $output, FILE_APPEND);
+
+            return;
         }
 
         $exists = file_exists($pathname);
@@ -145,8 +144,6 @@ class FileLog extends BaseLog
             ), E_USER_WARNING);
             $selfError = false;
         }
-
-        return $result;
     }
 
     /**
