@@ -83,7 +83,7 @@ class SimpleCacheEngine implements CacheInterface, CacheEngineInterface
      * @return mixed The value of the item from the cache, or $default in case of cache miss.
      * @throws \Cake\Cache\InvalidArgumentException If the $key string is not a legal value.
      */
-    public function get($key, $default = null)
+    public function get($key, $default = null): mixed
     {
         $this->ensureValidKey($key);
         $result = $this->innerEngine->read($key);
@@ -106,7 +106,7 @@ class SimpleCacheEngine implements CacheInterface, CacheEngineInterface
      * @throws \Cake\Cache\InvalidArgumentException
      *   MUST be thrown if the $key string is not a legal value.
      */
-    public function set($key, $value, $ttl = null)
+    public function set($key, $value, $ttl = null): bool
     {
         $this->ensureValidKey($key);
         if ($ttl !== null) {
@@ -131,7 +131,7 @@ class SimpleCacheEngine implements CacheInterface, CacheEngineInterface
      * @return bool True if the item was successfully removed. False if there was an error.
      * @throws \Cake\Cache\InvalidArgumentException If the $key string is not a legal value.
      */
-    public function delete($key)
+    public function delete($key): bool
     {
         $this->ensureValidKey($key);
 
@@ -143,7 +143,7 @@ class SimpleCacheEngine implements CacheInterface, CacheEngineInterface
      *
      * @return bool True on success and false on failure.
      */
-    public function clear()
+    public function clear(): bool
     {
         return $this->innerEngine->clear(false);
     }
@@ -157,7 +157,7 @@ class SimpleCacheEngine implements CacheInterface, CacheEngineInterface
      * @throws \Cake\Cache\InvalidArgumentException If $keys is neither an array nor a Traversable,
      *   or if any of the $keys are not a legal value.
      */
-    public function getMultiple($keys, $default = null)
+    public function getMultiple($keys, $default = null): iterable
     {
         $this->ensureValidKeys($keys);
 
@@ -182,7 +182,7 @@ class SimpleCacheEngine implements CacheInterface, CacheEngineInterface
      * @throws \Cake\Cache\InvalidArgumentException If $values is neither an array nor a Traversable,
      *   or if any of the $values are not a legal value.
      */
-    public function setMultiple($values, $ttl = null)
+    public function setMultiple($values, $ttl = null): bool
     {
         $this->ensureValidKeys(array_keys($values));
 
@@ -216,7 +216,7 @@ class SimpleCacheEngine implements CacheInterface, CacheEngineInterface
      * @throws \Cake\Cache\InvalidArgumentException If $keys is neither an array nor a Traversable,
      *   or if any of the $keys are not a legal value.
      */
-    public function deleteMultiple($keys)
+    public function deleteMultiple($keys): bool
     {
         $this->ensureValidKeys($keys);
 
@@ -242,7 +242,7 @@ class SimpleCacheEngine implements CacheInterface, CacheEngineInterface
      * @return bool
      * @throws \Cake\Cache\InvalidArgumentException If the $key string is not a legal value.
      */
-    public function has($key)
+    public function has($key): bool
     {
         return $this->get($key) !== null;
     }
