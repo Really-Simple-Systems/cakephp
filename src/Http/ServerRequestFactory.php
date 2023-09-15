@@ -17,6 +17,7 @@ namespace Cake\Http;
 use Cake\Core\Configure;
 use Cake\Utility\Hash;
 use Laminas\Diactoros\ServerRequestFactory as BaseFactory;
+use Laminas\Diactoros\ServerRequestFilter\FilterServerRequestInterface;
 
 /**
  * Factory for making ServerRequest instances.
@@ -29,14 +30,21 @@ abstract class ServerRequestFactory extends BaseFactory
 {
     /**
      * {@inheritDoc}
+     * @param array|null $server
+     * @param array|null $query
+     * @param array|null $body
+     * @param array|null $cookies
+     * @param array|null $files
+     * @param FilterServerRequestInterface|null $requestFilter
      */
     public static function fromGlobals(
         array $server = null,
         array $query = null,
         array $body = null,
         array $cookies = null,
-        array $files = null
-    ) {
+        array $files = null,
+        FilterServerRequestInterface|null $requestFilter = null
+    ): \Psr\Http\Message\ServerRequestInterface {
         $server = static::normalizeServer($server ?: $_SERVER);
         $uri = static::createUri($server);
         $sessionConfig = (array)Configure::read('Session') + [
