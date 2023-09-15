@@ -28,7 +28,7 @@
         "source": "https://github.com/cakephp/cakephp"
     },
     "require": {
-        "php": "^8.0",
+        "php": "^8.1",
         "ext-intl": "*",
         "ext-mbstring": "*",
         "cakephp/chronos": "^1.0.1",
