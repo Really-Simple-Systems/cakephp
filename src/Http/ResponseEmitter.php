@@ -21,7 +21,7 @@ namespace Cake\Http;
 use Cake\Core\Configure;
 use Cake\Log\Log;
 use Laminas\Diactoros\RelativeStream;
-use Laminas\Diactoros\Response\EmitterInterface;
+use Laminas\HttpHandlerRunner\Emitter\EmitterInterface;
 use Psr\Http\Message\ResponseInterface;
 
 /**
@@ -41,10 +41,10 @@ class ResponseEmitter implements EmitterInterface
     /**
      * {@inheritDoc}
      *
-     * @param \Psr\Http\Message\ResponseInterface $response Response
+     * @param ResponseInterface $response Response
      * @param int $maxBufferLength Max buffer length
      */
-    public function emit(ResponseInterface $response, $maxBufferLength = 8192)
+    public function emit(ResponseInterface $response, int $maxBufferLength = 8192): bool
     {
         $file = $line = null;
         if (headers_sent($file, $line)) {
@@ -54,6 +54,8 @@ class ResponseEmitter implements EmitterInterface
             } else {
                 Log::warning($message);
             }
+
+            return false;
         }
 
         $this->emitStatusLine($response);
@@ -71,12 +73,14 @@ class ResponseEmitter implements EmitterInterface
             session_write_close();
             fastcgi_finish_request();
         }
+
+        return true;
     }
 
     /**
      * Emit the message body.
      *
-     * @param \Psr\Http\Message\ResponseInterface $response The response to emit
+     * @param ResponseInterface $response The response to emit
      * @param int $maxBufferLength The chunk size to emit
      * @return void
      */
@@ -103,7 +107,7 @@ class ResponseEmitter implements EmitterInterface
      * Emit a range of the message body.
      *
      * @param array $range The range data to emit
-     * @param \Psr\Http\Message\ResponseInterface $response The response to emit
+     * @param ResponseInterface $response The response to emit
      * @param int $maxBufferLength The chunk size to emit
      * @return void
      */
@@ -141,7 +145,7 @@ class ResponseEmitter implements EmitterInterface
      * Emits the status line using the protocol version and status code from
      * the response; if a reason phrase is available, it, too, is emitted.
      *
-     * @param \Psr\Http\Message\ResponseInterface $response The response to emit
+     * @param ResponseInterface $response The response to emit
      * @return void
      */
     protected function emitStatusLine(ResponseInterface $response)
@@ -163,7 +167,7 @@ class ResponseEmitter implements EmitterInterface
      * in such a way as to create aggregate headers (instead of replace
      * the previous).
      *
-     * @param \Psr\Http\Message\ResponseInterface $response The response to emit
+     * @param ResponseInterface $response The response to emit
      * @return void
      */
     protected function emitHeaders(ResponseInterface $response)
