@@ -18,6 +18,11 @@ use Cake\Core\Configure;
 use Cake\Utility\Hash;
 use Laminas\Diactoros\ServerRequestFactory as BaseFactory;
 use Laminas\Diactoros\ServerRequestFilter\FilterServerRequestInterface;
+use Laminas\Diactoros\UriFactory;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\UriInterface;
+use function Laminas\Diactoros\marshalHeadersFromSapi;
+use function Laminas\Diactoros\normalizeServer;
 
 /**
  * Factory for making ServerRequest instances.
@@ -44,15 +49,16 @@ abstract class ServerRequestFactory extends BaseFactory
         array $cookies = null,
         array $files = null,
         FilterServerRequestInterface|null $requestFilter = null
-    ): \Psr\Http\Message\ServerRequestInterface {
-        $server = static::normalizeServer($server ?: $_SERVER);
+    ): ServerRequestInterface {
+        $server = normalizeServer($server ?: $_SERVER);
         $uri = static::createUri($server);
         $sessionConfig = (array)Configure::read('Session') + [
             'defaults' => 'php',
             'cookiePath' => $uri->webroot,
         ];
         $session = Session::create($sessionConfig);
-        $request = new ServerRequest([
+
+        return new ServerRequest([
             'environment' => $server,
             'uri' => $uri,
             'files' => $files ?: $_FILES,
@@ -64,8 +70,6 @@ abstract class ServerRequestFactory extends BaseFactory
             'session' => $session,
             'mergeFilesAsObjects' => Configure::read('App.uploadedFilesAsObjects', false),
         ]);
-
-        return $request;
     }
 
     /**
@@ -73,13 +77,13 @@ abstract class ServerRequestFactory extends BaseFactory
      *
      * @param array $server Array of server data to build the Uri from.
      *   $_SERVER will be added into the $server parameter.
-     * @return \Psr\Http\Message\UriInterface New instance.
+     * @return UriInterface New instance.
      */
-    public static function createUri(array $server = [])
+    public static function createUri(array $server = []): UriInterface
     {
         $server += $_SERVER;
-        $server = static::normalizeServer($server);
-        $headers = static::marshalHeaders($server);
+        $server = normalizeServer($server);
+        $headers = marshalHeadersFromSapi($server);
 
         return static::marshalUriFromServer($server, $headers);
     }
@@ -92,11 +96,12 @@ abstract class ServerRequestFactory extends BaseFactory
      *
      * @param array $server The server parameters.
      * @param array $headers The normalized headers
-     * @return \Psr\Http\Message\UriInterface a constructed Uri
+     * @return UriInterface a constructed Uri
      */
-    public static function marshalUriFromServer(array $server, array $headers)
+    public static function marshalUriFromServer(array $server, array $headers): UriInterface
     {
-        $uri = parent::marshalUriFromServer($server, $headers);
+        $uri = UriFactory::createFromSapi($server, $headers);
+
         list($base, $webroot) = static::getBase($uri, $server);
 
         // Look in PATH_INFO first, as this is the exact value we need prepared
@@ -124,8 +129,8 @@ abstract class ServerRequestFactory extends BaseFactory
      * Updates the request URI to remove the base directory.
      *
      * @param string $base The base path to remove.
-     * @param \Psr\Http\Message\UriInterface $uri The uri to update.
-     * @return \Psr\Http\Message\UriInterface The modified Uri instance.
+     * @param UriInterface $uri The uri to update.
+     * @return UriInterface The modified Uri instance.
      */
     protected static function updatePath($base, $uri)
     {
@@ -154,7 +159,7 @@ abstract class ServerRequestFactory extends BaseFactory
     /**
      * Calculate the base directory and webroot directory.
      *
-     * @param \Psr\Http\Message\UriInterface $uri The Uri instance.
+     * @param UriInterface $uri The Uri instance.
      * @param array $server The SERVER data to use.
      * @return array An array containing the [baseDir, webroot]
      */

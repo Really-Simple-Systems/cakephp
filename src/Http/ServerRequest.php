@@ -19,12 +19,12 @@ use BadMethodCallException;
 use Cake\Core\Configure;
 use Cake\Http\Cookie\CookieCollection;
 use Cake\Http\Exception\MethodNotAllowedException;
-use Cake\Http\Session;
 use Cake\Utility\Hash;
 use InvalidArgumentException;
-use Laminas\Diactoros\PhpInputStream;
 use Laminas\Diactoros\Stream;
 use Laminas\Diactoros\UploadedFile;
+use Psr\Http\Message\MessageInterface;
+use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UploadedFileInterface;
@@ -368,7 +368,7 @@ class ServerRequest implements ArrayAccess, ServerRequestInterface
             $stream->write($config['input']);
             $stream->rewind();
         } else {
-            $stream = new PhpInputStream();
+            $stream = new Stream('php://input', 'r');
         }
         $this->stream = $stream;
 
@@ -1187,7 +1187,7 @@ class ServerRequest implements ArrayAccess, ServerRequestInterface
      * @return array An associative array of headers and their values.
      * @link http://www.php-fig.org/psr/psr-7/ This method is part of the PSR-7 server request interface.
      */
-    public function getHeaders()
+    public function getHeaders(): array
     {
         $headers = [];
         foreach ($this->_environment as $key => $value) {
@@ -1215,7 +1215,7 @@ class ServerRequest implements ArrayAccess, ServerRequestInterface
      * @return bool Whether or not the header is defined.
      * @link http://www.php-fig.org/psr/psr-7/ This method is part of the PSR-7 server request interface.
      */
-    public function hasHeader($name)
+    public function hasHeader($name): bool
     {
         $name = $this->normalizeHeaderName($name);
 
@@ -1233,7 +1233,7 @@ class ServerRequest implements ArrayAccess, ServerRequestInterface
      *   If the header doesn't exist, an empty array will be returned.
      * @link http://www.php-fig.org/psr/psr-7/ This method is part of the PSR-7 server request interface.
      */
-    public function getHeader($name)
+    public function getHeader($name): array
     {
         $name = $this->normalizeHeaderName($name);
         if (isset($this->_environment[$name])) {
@@ -1250,7 +1250,7 @@ class ServerRequest implements ArrayAccess, ServerRequestInterface
      * @return string Header values collapsed into a comma separated string.
      * @link http://www.php-fig.org/psr/psr-7/ This method is part of the PSR-7 server request interface.
      */
-    public function getHeaderLine($name)
+    public function getHeaderLine($name): string
     {
         $value = $this->getHeader($name);
 
@@ -1265,7 +1265,7 @@ class ServerRequest implements ArrayAccess, ServerRequestInterface
      * @return static
      * @link http://www.php-fig.org/psr/psr-7/ This method is part of the PSR-7 server request interface.
      */
-    public function withHeader($name, $value)
+    public function withHeader($name, $value): MessageInterface
     {
         $new = clone $this;
         $name = $this->normalizeHeaderName($name);
@@ -1285,7 +1285,7 @@ class ServerRequest implements ArrayAccess, ServerRequestInterface
      * @return static
      * @link http://www.php-fig.org/psr/psr-7/ This method is part of the PSR-7 server request interface.
      */
-    public function withAddedHeader($name, $value)
+    public function withAddedHeader($name, $value): MessageInterface
     {
         $new = clone $this;
         $name = $this->normalizeHeaderName($name);
@@ -1306,7 +1306,7 @@ class ServerRequest implements ArrayAccess, ServerRequestInterface
      * @return static
      * @link http://www.php-fig.org/psr/psr-7/ This method is part of the PSR-7 server request interface.
      */
-    public function withoutHeader($name)
+    public function withoutHeader($name): MessageInterface
     {
         $new = clone $this;
         $name = $this->normalizeHeaderName($name);
@@ -1345,7 +1345,7 @@ class ServerRequest implements ArrayAccess, ServerRequestInterface
      * @return string The name of the HTTP method used.
      * @link http://www.php-fig.org/psr/psr-7/ This method is part of the PSR-7 server request interface.
      */
-    public function getMethod()
+    public function getMethod(): string
     {
         return $this->getEnv('REQUEST_METHOD');
     }
@@ -1357,7 +1357,7 @@ class ServerRequest implements ArrayAccess, ServerRequestInterface
      * @return static A new instance with the updated method.
      * @link http://www.php-fig.org/psr/psr-7/ This method is part of the PSR-7 server request interface.
      */
-    public function withMethod($method)
+    public function withMethod($method): RequestInterface
     {
         $new = clone $this;
 
@@ -1384,7 +1384,7 @@ class ServerRequest implements ArrayAccess, ServerRequestInterface
      * @return array
      * @link http://www.php-fig.org/psr/psr-7/ This method is part of the PSR-7 server request interface.
      */
-    public function getServerParams()
+    public function getServerParams(): array
     {
         return $this->_environment;
     }
@@ -1396,7 +1396,7 @@ class ServerRequest implements ArrayAccess, ServerRequestInterface
      * @return array
      * @link http://www.php-fig.org/psr/psr-7/ This method is part of the PSR-7 server request interface.
      */
-    public function getQueryParams()
+    public function getQueryParams(): array
     {
         return $this->query;
     }
@@ -1408,7 +1408,7 @@ class ServerRequest implements ArrayAccess, ServerRequestInterface
      * @return static A new instance with the updated query string data.
      * @link http://www.php-fig.org/psr/psr-7/ This method is part of the PSR-7 server request interface.
      */
-    public function withQueryParams(array $query)
+    public function withQueryParams(array $query): ServerRequestInterface
     {
         $new = clone $this;
         $new->query = $query;
@@ -1882,7 +1882,7 @@ class ServerRequest implements ArrayAccess, ServerRequestInterface
      *
      * @return array An array of cookie data.
      */
-    public function getCookieParams()
+    public function getCookieParams(): array
     {
         return $this->cookies;
     }
@@ -1893,7 +1893,7 @@ class ServerRequest implements ArrayAccess, ServerRequestInterface
      * @param array $cookies The new cookie data to use.
      * @return static
      */
-    public function withCookieParams(array $cookies)
+    public function withCookieParams(array $cookies): ServerRequestInterface
     {
         $new = clone $this;
         $new->cookies = $cookies;
@@ -1924,7 +1924,7 @@ class ServerRequest implements ArrayAccess, ServerRequestInterface
      *     typically be in an array or object.
      * @return static
      */
-    public function withParsedBody($data)
+    public function withParsedBody($data): ServerRequestInterface
     {
         $new = clone $this;
         $new->data = $data;
@@ -1937,7 +1937,7 @@ class ServerRequest implements ArrayAccess, ServerRequestInterface
      *
      * @return string HTTP protocol version.
      */
-    public function getProtocolVersion()
+    public function getProtocolVersion(): string
     {
         if ($this->protocol) {
             return $this->protocol;
@@ -1963,7 +1963,7 @@ class ServerRequest implements ArrayAccess, ServerRequestInterface
      * @param string $version HTTP protocol version
      * @return static
      */
-    public function withProtocolVersion($version)
+    public function withProtocolVersion($version): MessageInterface
     {
         if (!preg_match('/^(1\.[01]|2)$/', $version)) {
             throw new InvalidArgumentException("Unsupported protocol version '{$version}' provided");
@@ -2189,7 +2189,7 @@ class ServerRequest implements ArrayAccess, ServerRequestInterface
      * @param mixed $value The value of the attribute.
      * @return static
      */
-    public function withAttribute($name, $value)
+    public function withAttribute($name, $value): ServerRequestInterface
     {
         $new = clone $this;
         if (in_array($name, $this->emulatedAttributes, true)) {
@@ -2208,7 +2208,7 @@ class ServerRequest implements ArrayAccess, ServerRequestInterface
      * @return static
      * @throws \InvalidArgumentException
      */
-    public function withoutAttribute($name)
+    public function withoutAttribute($name): ServerRequestInterface
     {
         $new = clone $this;
         if (in_array($name, $this->emulatedAttributes, true)) {
@@ -2248,7 +2248,7 @@ class ServerRequest implements ArrayAccess, ServerRequestInterface
      *
      * @return array
      */
-    public function getAttributes()
+    public function getAttributes(): array
     {
         $emulated = [
             'params' => $this->params,
@@ -2281,7 +2281,7 @@ class ServerRequest implements ArrayAccess, ServerRequestInterface
      *
      * @return array
      */
-    public function getUploadedFiles()
+    public function getUploadedFiles(): array
     {
         return $this->uploadedFiles;
     }
@@ -2293,7 +2293,7 @@ class ServerRequest implements ArrayAccess, ServerRequestInterface
      * @return static
      * @throws \InvalidArgumentException when $files contains an invalid object.
      */
-    public function withUploadedFiles(array $files)
+    public function withUploadedFiles(array $files): ServerRequestInterface
     {
         $this->validateUploadedFiles($files, '');
         $new = clone $this;
@@ -2329,7 +2329,7 @@ class ServerRequest implements ArrayAccess, ServerRequestInterface
      *
      * @return \Psr\Http\Message\StreamInterface Returns the body as a stream.
      */
-    public function getBody()
+    public function getBody(): StreamInterface
     {
         return $this->stream;
     }
@@ -2340,7 +2340,7 @@ class ServerRequest implements ArrayAccess, ServerRequestInterface
      * @param \Psr\Http\Message\StreamInterface $body The new request body
      * @return static
      */
-    public function withBody(StreamInterface $body)
+    public function withBody(StreamInterface $body): MessageInterface
     {
         $new = clone $this;
         $new->stream = $body;
@@ -2354,7 +2354,7 @@ class ServerRequest implements ArrayAccess, ServerRequestInterface
      * @return \Psr\Http\Message\UriInterface Returns a UriInterface instance
      *   representing the URI of the request.
      */
-    public function getUri()
+    public function getUri(): UriInterface
     {
         return $this->uri;
     }
@@ -2369,7 +2369,7 @@ class ServerRequest implements ArrayAccess, ServerRequestInterface
      * @param bool $preserveHost Whether or not the host should be retained.
      * @return static
      */
-    public function withUri(UriInterface $uri, $preserveHost = false)
+    public function withUri(UriInterface $uri, $preserveHost = false): RequestInterface
     {
         $new = clone $this;
         $new->uri = $uri;
@@ -2402,7 +2402,7 @@ class ServerRequest implements ArrayAccess, ServerRequestInterface
      * @param string $target The request target.
      * @return static
      */
-    public function withRequestTarget($target)
+    public function withRequestTarget($target): RequestInterface
     {
         $new = clone $this;
         $new->requestTarget = $target;
@@ -2420,7 +2420,7 @@ class ServerRequest implements ArrayAccess, ServerRequestInterface
      *
      * @return string
      */
-    public function getRequestTarget()
+    public function getRequestTarget(): string
     {
         if ($this->requestTarget !== null) {
             return $this->requestTarget;
