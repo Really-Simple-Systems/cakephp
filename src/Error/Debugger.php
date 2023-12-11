@@ -812,11 +812,11 @@ class Debugger
             case false:
                 $this->_data[] = compact('context', 'trace') + $data;
 
-                return;
+                return '';
             case 'log':
                 static::log(compact('context', 'trace') + $data);
 
-                return;
+                return '';
         }
 
         $data['trace'] = $trace;
