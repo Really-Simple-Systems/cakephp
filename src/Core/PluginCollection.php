@@ -113,12 +113,12 @@ class PluginCollection implements Iterator, Countable
      * This method is not part of the official public API as plugins with
      * no plugin class are being phased out.
      *
-     * @param string $name The plugin name to locate a path for. Will return '' when a plugin cannot be found.
+     * @param ?string $name The plugin name to locate a path for. Will return '' when a plugin cannot be found.
      * @return string
      * @throws \Cake\Core\Exception\MissingPluginException when a plugin path cannot be resolved.
      * @internal
      */
-    public function findPath(string $name): string
+    public function findPath(?string $name): string
     {
         $this->loadConfig();
 
@@ -158,10 +158,10 @@ class PluginCollection implements Iterator, Countable
     /**
      * Remove a plugin from the collection if it exists.
      *
-     * @param string $name The named plugin.
+     * @param ?string $name The named plugin.
      * @return $this
      */
-    public function remove(string $name): static
+    public function remove(?string $name): static
     {
         unset($this->plugins[$name]);
         $this->names = array_keys($this->plugins);
@@ -187,10 +187,10 @@ class PluginCollection implements Iterator, Countable
     /**
      * Check whether the named plugin exists in the collection.
      *
-     * @param string $name The named plugin.
+     * @param ?string $name
      * @return bool
      */
-    public function has(string $name): bool
+    public function has(?string $name): bool
     {
         return isset($this->plugins[$name]);
     }
@@ -198,11 +198,11 @@ class PluginCollection implements Iterator, Countable
     /**
      * Get the a plugin by name
      *
-     * @param string $name The plugin to get.
+     * @param ?string $name The plugin to get.
      * @return \Cake\Core\PluginInterface The plugin.
      * @throws \Cake\Core\Exception\MissingPluginException when unknown plugins are fetched.
      */
-    public function get(string $name): PluginInterface
+    public function get(?string $name): PluginInterface
     {
         if (!$this->has($name)) {
             throw new MissingPluginException(['plugin' => $name]);
