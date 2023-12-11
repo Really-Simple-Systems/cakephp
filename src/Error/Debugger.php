@@ -772,9 +772,8 @@ class Debugger
      * Takes a processed array of data from an error and displays it in the chosen format.
      *
      * @param array $data Data to output.
-     * @return void
      */
-    public function outputError($data)
+    public function outputError($data): ?string
     {
         $defaults = [
             'level' => 0,
@@ -850,9 +849,10 @@ class Debugger
         if (isset($tpl['callback']) && is_callable($tpl['callback'])) {
             call_user_func($tpl['callback'], $data, compact('links', 'info'));
 
-            return;
+            return '';
         }
-        echo Text::insert($tpl['error'], compact('links', 'info') + $data, $insertOpts);
+
+        return Text::insert($tpl['error'], compact('links', 'info') + $data, $insertOpts);
     }
 
     /**
